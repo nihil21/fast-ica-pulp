@@ -2,7 +2,7 @@
 Blind source separation of sEMG signals using PULP platform
 
 ## Usage
-First of all, use `docker-compose run --rm smeg-bss` to run the container and open a shell.
+First of all, use `docker-compose run --rm pulp` to run the container and open a shell.
 Then, move to the directory containing the project (i.e. `~/workspace/fast-ica`) and compile it using `make clean all`; you can set the following variables:
 
 - `COMP`: number of independent components;
