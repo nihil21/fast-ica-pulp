@@ -1,0 +1,22 @@
+========== L1 ==========
+----- Parallel -----
+N. iterations: 4/3000
+Number of Instructions: 59581528
+Clock Cycles: 108279520
+CPI: 1.817334
+----- Deflation -----
+N. iterations: 3/3000 + 5/3000 + 1/3000
+Number of Instructions: 4956674
+Clock Cycles: 8800834
+CPI: 1.775552
+========== L2 ==========
+----- Parallel -----
+N. iterations: 4/3000
+Number of Instructions: 57321948
+Clock Cycles: 248728081
+CPI: 4.339142
+----- Deflation -----
+N. iterations: 3/3000 + 5/3000 + 1/3000
+Number of Instructions: 4939616
+Clock Cycles: 24221315
+CPI: 4.903481
