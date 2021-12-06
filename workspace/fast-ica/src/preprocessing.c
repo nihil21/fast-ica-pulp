@@ -22,8 +22,16 @@ Tuple *center(Matrix *x) {
 
 void eigen_sort(Matrix *eig_vals, Matrix *eig_vecs) {
     int n_eig = eig_vals->height;
+
+    int *sort_idx;
+    if (eig_vals->on_cluster) {
+        sort_idx = pi_l1_malloc(&cluster_dev, n_eig * sizeof(int));
+    } else {
+        sort_idx = pi_l2_malloc(n_eig * sizeof(int));
+    }
+    
     // Sort eigenvalues in descending order
-    int* sort_idx = quick_sort(eig_vals->data, n_eig, true);
+    quick_sort(eig_vals->data, sort_idx, n_eig, true);
 
     // Reorder eig_vecs according to sort_idx
     Matrix *eig_vecs_copy = copy_mat(eig_vecs);
@@ -36,7 +44,11 @@ void eigen_sort(Matrix *eig_vals, Matrix *eig_vecs) {
     }
 
     // Free memory
-    pi_l1_free(&cluster_dev, sort_idx, n_eig * sizeof(int));
+    if (eig_vals->on_cluster) {
+        pi_l1_free(&cluster_dev, sort_idx, n_eig * sizeof(int));
+    } else {
+        pi_l2_free(sort_idx, n_eig * sizeof(int));
+    }
     free_mat(eig_vecs_copy);
 }
 
@@ -54,7 +66,7 @@ Tuple *whitening(Matrix *x, bool center_data, int n_components) {
         eigen_sort(eig_vals, eig_vecs);
 
     int n = eig_vals->height;
-    Matrix *d = new_mat(n, n, true);
+    Matrix *d = new_mat(n, n, x->on_cluster);
     for (int i = 0; i < n; i++)
         MAT_CELL(d, i, i) = 1 / SQRT(MAT_CELL(eig_vals, i, 0));
 

@@ -72,9 +72,10 @@ Matrix *to_hessenberg(Matrix *m) {
  * QR decomposition using Householder reflections
  */
 Tuple *qr_decomposition(Matrix *m) {
+    bool on_cluster = m->on_cluster;
     int n = m->height;
     Matrix *r = copy_mat(m);
-    Matrix *q = eye(n, true);
+    Matrix *q = eye(n, on_cluster);
     for (int k = 0; k < n; k++) {
         // Extract k-th column
         Matrix *r_k = read_slice(r, k, n - 1, k, k);
@@ -84,7 +85,7 @@ Tuple *qr_decomposition(Matrix *m) {
         free_mat(r_k);
 
         // Compute Hk
-        Matrix *h = eye(n, true);
+        Matrix *h = eye(n, on_cluster);
         Matrix *h_k = read_slice(h, k, n - 1, k, n - 1);
         Matrix *tmp = mat_mul_t2(v_k, v_k);
         scale_(tmp, tau);
@@ -124,16 +125,17 @@ Tuple *qr_decomposition(Matrix *m) {
  * Compute the eigenvalues of a square matrix by means of QR decomposition with shift and Hessenberg reduction
  */
 Matrix *solve_eig_vals(Matrix *m, fp tol, int max_iter) {
+    bool on_cluster = m->on_cluster;
     // Tri-diagonalize matrix using Hessenberg
     Matrix *t = to_hessenberg(m);
     int n = t->height;
-    Matrix *eig_vals = new_vec(n, true);  // column vector
+    Matrix *eig_vals = new_vec(n, on_cluster);  // column vector
 
     int k = n - 1;
     int i = 0;
     while (k > 0 && i < max_iter) {
         // Obtain the shift from the lower right corner of the matrix.
-        Matrix *mu = eye(k + 1, true);
+        Matrix *mu = eye(k + 1, on_cluster);
         scale_(mu, MAT_CELL(t, k, k));
 
         // Shift T matrix and perform QR on shifted matrix
@@ -155,13 +157,21 @@ Matrix *solve_eig_vals(Matrix *m, fp tol, int max_iter) {
             MAT_CELL(eig_vals, k, 0) = MAT_CELL(t, k, k);
             Matrix *tmp = read_slice(t, 0, k - 1, 0, k - 1);
             // Free T data field
-            pi_l1_free(&cluster_dev, MAT_DATA(t), t->height * t->width * sizeof(fp));
+            if (on_cluster) {
+                pi_l1_free(&cluster_dev, MAT_DATA(t), t->height * t->width * sizeof(fp));
+            } else {
+                pi_l2_free(MAT_DATA(t), t->height * t->width * sizeof(fp));
+            }
             // Manually change T fields to Tmp
             *(uint *) &t->height = tmp->height;  // cast away constness
             *(uint *) &t->width = tmp->width;  // cast away constness
             MAT_DATA(t) = MAT_DATA(tmp);
             // Free Tmp struct (but not data field)
-            pi_l1_free(&cluster_dev, tmp, sizeof(Matrix));
+            if (on_cluster) {
+                pi_l1_free(&cluster_dev, tmp, sizeof(Matrix));
+            } else {
+                pi_l2_free(tmp, sizeof(Matrix));
+            }
 
             k--;
         }
@@ -178,15 +188,16 @@ Matrix *solve_eig_vals(Matrix *m, fp tol, int max_iter) {
  * Compute the eigenvector associated to an eigenvalue by means of inverse iteration
  */
 Matrix *inv_iter(fp eig_val, Matrix *m, fp tol, int max_iter) {
+    bool on_cluster = m->on_cluster;
     // Perturb lambda to prevent the computed matrix from becoming singular
     fp lambda = eig_val + (fp) uniform_rand() * 1e-6f;
     // Compute M' = M - lambda * I
-    Matrix *lambda_i = eye(m->height, true);
+    Matrix *lambda_i = eye(m->height, on_cluster);
     scale_(lambda_i, lambda);
     Matrix *m_prime = sub_mat(m, lambda_i);
 
     // Initialize vector randomly
-    Matrix *eig_vec = mat_randn(m->height, 1, true);  // column vector
+    Matrix *eig_vec = mat_randn(m->height, 1, on_cluster);  // column vector
     Matrix *prev;
 
     int i = 0;
@@ -223,7 +234,7 @@ Matrix *inv_iter(fp eig_val, Matrix *m, fp tol, int max_iter) {
  * Compute the eigenvectors of a square matrix given the eigenvalues
  */
 Matrix *solve_eig_vecs(Matrix *eig_vals, Matrix *m, fp tol, int max_iter) {
-    Matrix *eig_vecs = new_mat(m->height, m->width, true);
+    Matrix *eig_vecs = new_mat(m->height, m->width, m->on_cluster);
     // Iterate over eigenvalues
     for (int i = 0; i < eig_vals->height; i++) {
         // Extract current eigenvalue
@@ -259,7 +270,7 @@ Tuple *solve_eig(Matrix *m) {
 Matrix *back_substitution(Matrix *u, Matrix *y) {
     // NB: both X and Y are column vectors
     int n_eq = y->height;
-    Matrix *x = new_vec(n_eq, true);
+    Matrix *x = new_vec(n_eq, u->on_cluster);
 
     // Iterate over the cells of y backwards
     for (int i = n_eq - 1; i >= 0; i--) {

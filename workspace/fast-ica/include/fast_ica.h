@@ -15,8 +15,7 @@ typedef enum FastICAStrategy {
 typedef enum GFunc {
     LogCosh,
     Exp,
-    Cube,
-    Abs
+    Cube
 } GFunc;
 
 typedef struct FastICAArgs {

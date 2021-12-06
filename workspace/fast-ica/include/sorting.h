@@ -8,6 +8,6 @@
 #include <stdbool.h>
 #include "fp.h"
 
-int *quick_sort(fp v[], int len, bool desc);
+void quick_sort(fp v[], int *sort_id, int len, bool desc);
 
 #endif //FAST_ICA_SORTING_H

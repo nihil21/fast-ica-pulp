@@ -12,8 +12,14 @@ extern struct pi_device cluster_dev;
  * Creates a tuple from a pair of matrices (Cluster's L1 memory)
  */
 Tuple *new_tuple(Matrix *m1, Matrix *m2) {
+    assert(m1->on_cluster == m2->on_cluster, "The two matrices should be allocated on the same memory.");
     Tuple *tuple;
-    tuple = pi_l1_malloc(&cluster_dev, sizeof(Tuple));
+    
+    if (m1->on_cluster) {
+        tuple = pi_l1_malloc(&cluster_dev, sizeof(Tuple));
+    } else {
+        tuple = pi_l2_malloc(sizeof(Tuple));
+    }
     assert(tuple != NULL, "Could not allocate tuple.");
 
     // Set fields
@@ -27,8 +33,10 @@ Tuple *new_tuple(Matrix *m1, Matrix *m2) {
  * Free the memory allocated for a given tuple (Cluster's L1 memory)
  */
 void free_tuple(Tuple *tuple, bool free_members) {
+    bool on_cluster = tuple->m1->on_cluster;
+
     if (tuple != NULL) {
-        // Optionally free Matrix members
+        // Optionally free matrix members
         if (free_members) {
             // Free first matrix
             if (tuple->m1 != NULL) {
@@ -41,7 +49,11 @@ void free_tuple(Tuple *tuple, bool free_members) {
         }
 
         // Free tuple
-        pi_l1_free(&cluster_dev, tuple, sizeof(Tuple));
+        if (on_cluster) {
+            pi_l1_free(&cluster_dev, tuple, sizeof(Tuple));
+        } else {
+            pi_l2_free(tuple, sizeof(Tuple));
+        }
         tuple = NULL;
     }
 }

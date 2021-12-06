@@ -12,9 +12,10 @@
  * LogCosh function
  */
 Tuple *logcosh_f(Matrix *x) {
+    bool on_cluster = x->on_cluster;
     fp alpha = 1.f;
-    Matrix *gx = new_mat(x->height, x->width, true);
-    Matrix *gx_prime = new_mat(x->height, x->width, true);
+    Matrix *gx = new_mat(x->height, x->width, on_cluster);
+    Matrix *gx_prime = new_mat(x->height, x->width, on_cluster);
 
     for (int i = 0; i < x->height; i++) {
         for (int j = 0; j < x->width; j++) {
@@ -32,8 +33,9 @@ Tuple *logcosh_f(Matrix *x) {
  * Exponential function
  */
 Tuple *exp_f(Matrix *x) {
-    Matrix *gx = new_mat(x->height, x->width, true);
-    Matrix *gx_prime = new_mat(x->height, x->width, true);
+    bool on_cluster = x->on_cluster;
+    Matrix *gx = new_mat(x->height, x->width, on_cluster);
+    Matrix *gx_prime = new_mat(x->height, x->width, on_cluster);
 
     for (int i = 0; i < x->height; i++) {
         for (int j = 0; j < x->width; j++) {
@@ -52,33 +54,15 @@ Tuple *exp_f(Matrix *x) {
  * Cube function
  */
 Tuple *cube_f(Matrix *x) {
-    Matrix *gx = new_mat(x->height, x->width, true);
-    Matrix *gx_prime = new_mat(x->height, x->width, true);
+    bool on_cluster = x->on_cluster;
+    Matrix *gx = new_mat(x->height, x->width, on_cluster);
+    Matrix *gx_prime = new_mat(x->height, x->width, on_cluster);
 
     for (int i = 0; i < x->height; i++) {
         for (int j = 0; j < x->width; j++) {
             fp tmp = MAT_CELL(x, i, j) * MAT_CELL(x, i, j);
             MAT_CELL(gx, i, j) = MAT_CELL(x, i, j) * tmp;
             MAT_CELL(gx_prime, i, j) = 3 * tmp;
-        }
-    }
-
-    // Pack Gx and Gx' into a tuple
-    Tuple *res = new_tuple(gx, gx_prime);
-    return res;
-}
-
-/*
- * Abs function
- */
-Tuple *abs_f(Matrix *x) {
-    Matrix *gx = new_mat(x->height, x->width, true);
-    Matrix *gx_prime = new_mat(x->height, x->width, true);
-
-    for (int i = 0; i < x->height; i++) {
-        for (int j = 0; j < x->width; j++) {
-            MAT_CELL(gx, i, j) = ABS(MAT_CELL(x, i, j));
-            MAT_CELL(gx_prime, i, j) = (fp) SGN(MAT_CELL(x, i, j));
         }
     }
 
@@ -113,7 +97,7 @@ void symmetric_decorrelation(Matrix **w) {
     Matrix *eig_vals = eigen->m1;  // column vector
     Matrix *eig_vecs = eigen->m2;
     int n = eig_vals->height;
-    Matrix *d = new_mat(n, n, true);
+    Matrix *d = new_mat(n, n, (*w)->on_cluster);
     for (int i = 0; i < n; i++)
         MAT_CELL(d, i, i) = 1 / SQRT(MAT_CELL(eig_vals, i, 0));
     // Compute new weight matrix
@@ -137,7 +121,7 @@ Matrix *ica_def(Matrix *x_w, Tuple *(*g_func)(Matrix *), fp threshold, int max_i
     int n_samples = x_w->width;
 
     // Initialize weights randomly
-    Matrix *w = mat_randn(n_units, n_units, true);
+    Matrix *w = mat_randn(n_units, n_units, x_w->on_cluster);
     // Iterate over units
     for (int k = 0; k < n_units; k++) {
         // Initialize i-th neuron
@@ -193,11 +177,12 @@ Matrix *ica_def(Matrix *x_w, Tuple *(*g_func)(Matrix *), fp threshold, int max_i
  * Implement FastICA parallel strategy
  */
 Matrix *ica_par(Matrix *x_w, Tuple *(*g_func)(Matrix *), fp threshold, int max_iter) {
+    bool on_cluster = x_w->on_cluster;
     int n_units = x_w->height;
     int n_samples = x_w->width;
 
     // Initialize weights randomly and decorrelate
-    Matrix *w = mat_randn(n_units, n_units, true);
+    Matrix *w = mat_randn(n_units, n_units, on_cluster);
     symmetric_decorrelation(&w);
 
     for (int i = 0; i < max_iter; i++) {
@@ -209,8 +194,8 @@ Matrix *ica_par(Matrix *x_w, Tuple *(*g_func)(Matrix *), fp threshold, int max_i
         Matrix *g_ws = res->m1;  // (n_units, n_samples)
         Matrix *g_ws_prime = res->m2;  // (n_units, n_samples)
 
-        Matrix *a = new_mat(n_units, n_units, true);
-        Matrix *b = new_mat(n_units, n_units, true);
+        Matrix *a = new_mat(n_units, n_units, on_cluster);
+        Matrix *b = new_mat(n_units, n_units, on_cluster);
         // Iterate over units
         for (int k = 0; k < n_units; k++) {
             // Extract k-th row from G_Ws
@@ -286,8 +271,9 @@ void fast_ica(FastICAArgs *arg) {
     Matrix *x_w, *white_mtx, *x_mean;
     if (whiten) {
         int max_comp = n_features > n_samples ? n_features : n_samples;
-        if (n_components > max_comp)
+        if (n_components > max_comp) {
             n_components = max_comp;
+        }
 
         // Center
         Tuple *CenterData = center(x);
@@ -318,9 +304,6 @@ void fast_ica(FastICAArgs *arg) {
             break;
         case Cube:
             g = &cube_f;
-            break;
-        case Abs:
-            g = &abs_f;
             break;
         default:
             assert(false, "Unknown function");

@@ -63,6 +63,9 @@ static void cluster_entry(void *arg) {
     free_mat(res_cl);
 }
 
+/*
+ * Run FastICA using the cluster
+ */
 static void test_fast_ica() {
     // PMSIS data structures
     struct pi_cluster_conf conf;
@@ -124,6 +127,63 @@ static void test_fast_ica() {
     pmsis_exit(0);
 }
 
+/*
+ * Run FastICA using only the Fabric Controller (for test purposes)
+ */
+static void test_fast_ica_fc() {
+    // Set seed
+    set_prng_seed(42);
+
+    // Create matrix S of original signals (n_components, n_samples)
+    Matrix *s = generate_signals(SAMPLES, WINDOW_SIZE, ADD_NOISE);
+    // Standardize signal
+    Matrix *s_std = col_std(s);
+    div_col_(s, s_std);
+    if (VERB)
+        print_mat(s);
+
+    // Create mixing matrix A (n_observables, n_components)
+    fp a_data[] = {1, 1, 1, 0.5f, 2, 1, 1.5f, 1, 2, 0.3f, 0.9f, 1.7f};
+    Matrix *a = from_array(a_data, OBS, COMP, false);
+    if (VERB)
+        print_mat(a);
+
+    // Create observation X by mixing signal S with matrix A (n_observables, n_samples)
+    for (int i = 0; i < a->height; i++) {
+        for (int k = 0; k < a->width; k++) {
+            for (int j = 0; j < s->width; j++) {
+                x.data[i * x.width + j] += MAT_CELL(a, i, k) * MAT_CELL(s, k, j);
+            }
+        }
+    }
+    if (VERB)
+        print_mat(&x);
+    
+    // Prepare FastICA arguments
+    FastICAStrategy strategy = STRATEGY == 0 ? Parallel : Deflation;
+    GFunc g_function = G_FUNC == 0 ? LogCosh : (G_FUNC == 1 ? Exp : Cube);
+    Matrix *res_fc;
+    FastICAArgs fast_ica_arg = {&res_fc, &x, COMP, true, strategy, g_function, 1e-4, MAX_ITER};
+
+    // Perform FastICA and measure performance
+    perf(fast_ica, &fast_ica_arg);
+    
+    if (VERB)
+        print_mat(res_fc);
+
+    // Free memory
+    free_mat(s);
+    free_mat(s_std);
+    free_mat(a);
+    free_mat(res_fc);
+
+    pmsis_exit(0);
+}
+
 int main() {
-    return pmsis_kickoff((void *)test_fast_ica);
+    if (USE_CLUSTER) {  // use only Fabric Controller
+        return pmsis_kickoff((void *)test_fast_ica);
+    } else {  // use Cluster
+        return pmsis_kickoff((void *)test_fast_ica_fc);
+    }
 }

@@ -7,6 +7,10 @@ COMP ?= 3
 OBS ?= 4
 APP_CFLAGS += -D COMP=$(COMP) -D OBS=$(OBS)
 
+# Use Cluster too, or only Fabric Controller
+USE_CLUSTER ?= 1
+APP_CFLAGS += -D USE_CLUSTER=$(USE_CLUSTER)
+
 # Number of cores of the cluster to use
 CORES ?= 1
 APP_CFLAGS += -D CORES=$(CORES)

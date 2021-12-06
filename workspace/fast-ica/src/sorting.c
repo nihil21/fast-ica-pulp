@@ -3,9 +3,6 @@
 //
 
 #include "../include/sorting.h"
-#include "pmsis.h"
-
-extern struct pi_device cluster_dev;
 
 /*
  * Swap two elements
@@ -40,7 +37,7 @@ int compare(fp a, fp b){
 /*
  * Recursive sub-routine of QuickSort
  */
-void quick_sort_rec(fp v[], int *sort_id, int start, int end, int desc_fact){
+void quick_sort_rec(fp v[], int *sort_idx, int start, int end, int desc_fact){
     int i, j, i_pivot;
     fp pivot;
 
@@ -57,33 +54,32 @@ void quick_sort_rec(fp v[], int *sort_id, int start, int end, int desc_fact){
                 j--;
             if (i < j) {
                 swap(&(v[i]), &(v[j]));
-                swap_i(&(sort_id[i]), &(sort_id[j]));
+                swap_i(&(sort_idx[i]), &(sort_idx[j]));
             }
         } while (i < j);
 
         if (i != i_pivot && desc_fact * compare(v[i], v[i_pivot])) {
             swap(&(v[i]), &(v[i_pivot]));
-            swap_i(&(sort_id[i]), &(sort_id[i_pivot]));
+            swap_i(&(sort_idx[i]), &(sort_idx[i_pivot]));
             i_pivot = i;
         }
 
         if (start < i_pivot - 1)
-            quick_sort_rec(v, sort_id, start, i_pivot - 1, desc_fact);
+            quick_sort_rec(v, sort_idx, start, i_pivot - 1, desc_fact);
         if (i_pivot + 1 < end)
-            quick_sort_rec(v, sort_id, i_pivot + 1, end, desc_fact);
+            quick_sort_rec(v, sort_idx, i_pivot + 1, end, desc_fact);
     }
 }
 
 /*
  * QuickSort implementation
  */
-int *quick_sort(fp v[], int len, bool desc) {
+void quick_sort(fp v[], int *sort_idx, int len, bool desc) {
     int desc_fact = desc ? -1 : 1;
+    
     // Create array of indexes
-    int *sort_id = pi_l1_malloc(&cluster_dev, len * sizeof(int));
     for (int i = 0; i < len; i++)
-        sort_id[i] = i;
+        sort_idx[i] = i;
 
-    quick_sort_rec(v, sort_id, 0, len - 1, desc_fact);
-    return sort_id;
+    quick_sort_rec(v, sort_idx, 0, len - 1, desc_fact);
 }
