@@ -66,7 +66,7 @@ static void cluster_entry(void *arg) {
 /*
  * Run FastICA using the cluster
  */
-static void test_fast_ica() {
+static void run_fast_ica() {
     // PMSIS data structures
     struct pi_cluster_conf conf;
     struct pi_cluster_task cluster_task = {0};
@@ -130,7 +130,7 @@ static void test_fast_ica() {
 /*
  * Run FastICA using only the Fabric Controller (for test purposes)
  */
-static void test_fast_ica_fc() {
+static void run_fast_ica_fc() {
     // Set seed
     set_prng_seed(42);
 
@@ -182,8 +182,8 @@ static void test_fast_ica_fc() {
 
 int main() {
     if (USE_CLUSTER) {  // use only Fabric Controller
-        return pmsis_kickoff((void *)test_fast_ica);
+        return pmsis_kickoff((void *)run_fast_ica);
     } else {  // use Cluster
-        return pmsis_kickoff((void *)test_fast_ica_fc);
+        return pmsis_kickoff((void *)run_fast_ica_fc);
     }
 }
