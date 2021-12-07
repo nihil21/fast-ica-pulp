@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "matrix.h": "c",
-        "fast_ica.h": "c",
-        "cluster.h": "c",
-        "sorting.h": "c"
-    }
-}
