@@ -1,0 +1,6 @@
+version: '2.0'
+services:
+  fast-ica:
+    build: .
+    volumes:
+    - ./fast-ica:/home/pulp/fast-ica
