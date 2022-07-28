@@ -1,5 +1,5 @@
-# semg-bss
-Blind source separation of sEMG signals using PULP platform
+# FastICA - PULP
+Implementation of FastICA algorithm for PULP platform
 
 ## Usage
 First of all, use `docker-compose run --rm pulp` to run the container and open a shell.
