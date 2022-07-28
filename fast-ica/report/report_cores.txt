@@ -1,0 +1,40 @@
+Cores 1
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 1535364
+Clock Cycles: 1909297
+CPI: 1.243547
+Cores 2
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 996789
+Clock Cycles: 1297088
+CPI: 1.301266
+Cores 3
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 713334
+Clock Cycles: 993318
+CPI: 1.392501
+Cores 4
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 649317
+Clock Cycles: 908238
+CPI: 1.398759
+Cores 5
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 611940
+Clock Cycles: 878833
+CPI: 1.436142
+Cores 6
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 587135
+Clock Cycles: 853103
+CPI: 1.452993
+Cores 7
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 569147
+Clock Cycles: 833586
+CPI: 1.464623
+Cores 8
+gapy --target=pulp --platform=gvsoc --work-dir=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV/ --config-opt=cluster/nb_pe=8    run --exec-prepare --exec --binary=/home/pulp/workspace/fast-ica/BUILD/PULP/GCC_RISCV//fast-ica/fast-ica 
+Number of Instructions: 555152
+Clock Cycles: 809856
+CPI: 1.458800
