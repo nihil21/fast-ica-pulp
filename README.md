@@ -7,7 +7,7 @@ Then, move to the directory containing the project (i.e., `~/fast-ica`) and comp
 
 - `COMP`: number of independent components;
 - `OBS`: number of observations;
-- `USE_CLUSTER`: whether to offload the task to the cluster or use only the Fabric Controller
+- `USE_CLUSTER`: whether to offload the task to the cluster or use only the Fabric Controller;
 - `CORES`: number of cores to use (from 1 to 8);
 - `STRATEGY`: FastICA strategy (0 for Parallel and 1 for Deflation);
 - `G_FUNC`: G function to use in FastICA (0 for LogCosh, 1 for Exp and 2 for Cube);
