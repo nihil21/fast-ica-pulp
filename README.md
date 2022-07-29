@@ -3,7 +3,7 @@ Implementation of FastICA algorithm fot PULP platform
 
 ## Usage
 First of all, use `docker-compose run --rm pulp` to run the container and open a shell.
-Then, move to the directory containing the project (i.e. `~/workspace/fast-ica`) and compile it using `make clean all`; you can set the following variables:
+Then, move to the directory containing the project (i.e., `~/fast-ica`) and compile it using `make clean all`; you can set the following variables:
 
 - `COMP`: number of independent components;
 - `OBS`: number of observations;
@@ -18,3 +18,5 @@ Then, move to the directory containing the project (i.e. `~/workspace/fast-ica`)
 - `VERB`: whether to print the original signal, the observations and the recovered signal to standard output.
 
 Finally, the program can be run with `make run`.
+
+The results can be visualized using the `pyutils/plot_signals.py REPORT.LOG N_COMP N_REC` program.
