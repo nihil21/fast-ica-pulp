@@ -3,4 +3,4 @@ services:
   fast-ica:
     build: .
     volumes:
-    - ./fast-ica:/home/pulp/fast-ica
+    - ./fast-ica:/fast-ica
